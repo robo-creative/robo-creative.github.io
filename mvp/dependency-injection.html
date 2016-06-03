@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="description" content="Working with Variants in Robo MVP.">
+    <title>Dependency Injection - Robo MVP</title>
+    <!-- Favicons-->
+    <link rel="apple-touch-icon-precomposed" href="images/favicon/apple-touch-icon-152x152.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="images/favicon/mstile-144x144.png">
+    <link rel="icon" href="images/favicon/favicon-32x32.png" sizes="32x32">
+    <!--  Android 5 Chrome Color-->
+    <meta name="theme-color" content="#4CAF50">
+    <!-- CSS-->
+    <link href="css/androidstudio.css" rel="stylesheet">
+    <link href="css/site.css" type="text/css" rel="stylesheet" media="screen,projection">
+    <link href="http://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css">
+    <script src="js/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <div class="container"><a href="#" data-activates="nav-mobile" class="button-collapse top-nav"><i class="mdi-navigation-menu"></i></a></div>
+        <ul id="nav-mobile" class="side-nav fixed">
+            <li class="logo">
+                <a id="logo-container" href="index.html" class="brand-logo">
+                    <object id="front-page-logo" type="image/png" data="images/robo-mvp-logo-small.png" />Logo</object>
+                </a>
+            </li>
+            <li class="bold"><a href="getting-started.html" class="waves-effect waves-teal">Getting Started</a></li>
+            <li class="bold active"><a href="dependency-injection.html" class="waves-effect waves-teal">Dependency Injection</a></li>
+            <li class="bold"><a href="annotation-processor.html" class="waves-effect waves-teal">Annotation Processor</a></li>
+            <li class="bold"><a href="view-features.html" class="waves-effect waves-teal">View Features</a></li>
+            <li class="bold"><a href="view-types.html" class="waves-effect waves-teal">View Types</a></li>
+            <li class="bold"><a href="presenter-features.html" class="waves-effect waves-teal">Presenter Features</a></li>
+            <li class="bold"><a href="variants.html" class="waves-effect waves-teal">Variants</a></li>
+            <li class="bold"><a href="#" class="waves-effect waves-teal">Demo Center (Coming Soon)</a></li>
+            <li class="bold"><a href="javadocs/index.html" class="waves-effect waves-teal">Java Documentation</a></li>
+        </ul>
+    </header>
+    <main>
+        <div class="section" id="index-banner">
+            <div class="container">
+                <div class="row">
+                    <div class="col s12 m9">
+                        <h2 class="header center-on-small-only">Dependency Injection</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <!--  Outer row  -->
+            <div class="row">
+                <div class="section col s12 m9 l10">
+                    <div class="row scrollspy">
+                        <p>You may have heard of Dependency Injection and the huge benefit it brings up to your application development. With Robo MVP, you can easily employ some of the best Dependency Injection frameworks in developing applications.</p>
+                    </div>
+                </div>
+                <div class="section col s12 m9 l10">
+                    <div id="google-guice" class="row scrollspy">                        
+                        <h4 class="header">Google Guice</h4>
+                        <b>In Gradle</b>
+                        <p>Add following dependencies to your build.gradle:</p>
+<pre><code class="gradle">dependencies {
+    compile 'com.google.inject:guice:3.0:no_aop'
+    compile 'com.robocreative.android:robo-mvp-guice:1.0'
+}</code></pre>
+                        <b>Sample</b>
+                        <p>Let's say you have a SearchEngine being responsible for searching and returning SearchResult for every search operation. The SearchPresenter delegates searching to SearchEngine and asks the SearchView to display SearchResult.</p>
+<pre><code class="java">package com.example.myapplication;
+
+/**
+ * Defines a search engine.
+ */
+public interface SearchEngine {
+
+    /**
+     * Searches for a specified pattern.
+     */
+    SearchResult search(String pattern);
+}</code></pre>
+                        <p>Inject the SearchEngine to SearchPresenter by using @Inject on top of presenter's constructor.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.google.inject.Inject;
+import com.robo.mvp.AbstractPresenter;
+
+/**
+ * The presenter acts upon the SearchView.
+ */
+public class SearchPresenter extends AbstractPresenter&lt;SearchView&gt; {
+
+    private SearchEngine mSearchEngine;
+
+    @Inject
+    public SearchPresenter(SearchEngine searchEngine) {
+        mSearchEngine = searchEngine;
+    }
+
+    @Override
+    protected void onViewSet(final SearchView view) {
+        view.getListeners().set(SearchView.OnSearchListener.class, new SearchView.OnSearchListener() {
+            @Override
+            public void onSearch(String pattern) {
+                // asks view to display search result returned from search operation.
+                view.displayResult(mSearchEngine.search(pattern));
+            }
+        });
+    }
+}</code></pre>
+                        <p>In case of using multiple implementation of search engine (e.g Google, Bing etc.), you can use @Named to specify which implementation will be used.</p>
+<pre><code class="java">@Inject
+public SearchPresenter(@Named(&quot;Google&quot;) SearchEngine searchEngine) {
+    mSearchEngine = searchEngine;
+}</code></pre>
+                        <p>To register components to the container, use derivative of AbstractModule. You might have multiple modules at a time.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.name.Names;
+
+public class SearchModule extends AbstractModule {
+    @Override
+    protected void configure() {
+        bind(SearchEngine.class).annotatedWith(Names.named(&quot;Google&quot;)).to(GoogleSearchEngine.class);
+        bind(SearchEngine.class).annotatedWith(Names.named(&quot;Bing&quot;)).to(BingSearchEngine.class);
+        // and more...
+    }
+}</code></pre>
+                        <p>To register modules, create your bootstrapper as a derivative of com.robo.mvp.guice.AbstractBoostrapper and attach your application modules to module list.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.google.inject.AbstractModule;
+import com.robo.mvp.guice.AbstractBootstrapper;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+public class MyBootstrapper extends AbstractBootstrapper {
+    @Override
+    protected Collection&lt;AbstractModule&gt; collectModules() {
+        Collection&lt;AbstractModule&gt; modules = new ArrayList&lt;&gt;();
+        modules.add(new SearchModule());
+        return modules;
+    }
+}</code></pre>
+                        <p>Finally, start your bootstrapper in your application class. Don't forget to specify application name in AndroidManifest.xml.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.app.Application;
+
+public class MyApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        new MyBootstrapper().start();
+    }
+}</code></pre>
+                        <blockquote>Dependency Injection extension also supports Command Binding. You can find this feature in <a href="presenter-features.html#navigation">Presenter Features</a> section.</blockquote>
+                    </div>
+                </div>
+
+                <!-- Table of contents -->
+                <div class="col hide-on-small-only m3 l2">
+                    <div class="toc-wrapper">
+                        <div style="height: 1px;">
+                            <ul class="table-of-contents">
+                                <li><a href="#google-guice">Google Guice</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>    <footer class="page-footer">
+        <div class="footer-copyright">
+            <div class="container">
+                © 2016 Robo Creative. All rights reserved.
+            </div>
+        </div>
+    </footer>
+    <!--  Scripts-->
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="js/jquery.timeago.min.js"></script>
+    <script src="js/materialize.js"></script>
+    <script src="js/init.js"></script>
+</body>
+</html>                

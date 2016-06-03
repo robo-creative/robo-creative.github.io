@@ -1,0 +1,206 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="description" content="Quickly get started with Robo MVP.">
+    <title>Getting Started - Message Bus</title>
+    <!-- Favicons-->
+    <link rel="apple-touch-icon-precomposed" href="images/favicon/apple-touch-icon-152x152.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="images/favicon/mstile-144x144.png">
+    <link rel="icon" href="images/favicon/favicon-32x32.png" sizes="32x32">
+    <!--  Android 5 Chrome Color-->
+    <meta name="theme-color" content="#4CAF50">
+    <!-- CSS-->
+    <link href="css/androidstudio.css" rel="stylesheet">
+    <link href="css/site.css" type="text/css" rel="stylesheet" media="screen,projection">
+    <link href="http://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css">
+    <script src="js/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <div class="container"><a href="#" data-activates="nav-mobile" class="button-collapse top-nav"><i class="mdi-navigation-menu"></i></a></div>
+        <ul id="nav-mobile" class="side-nav fixed">
+            <li class="logo">
+                <a id="logo-container" href="index.html" class="brand-logo">
+                    <object id="front-page-logo" type="image/png" data="images/logo-small.png" />Logo</object>
+                </a>
+            </li>
+
+            <!-- GETTING STARTED -->
+            <li class="bold active"><a href="getting-started.html" class="waves-effect waves-teal">Getting Started</a></li>
+
+            <li class="bold"><a href="publication.html" class="waves-effect waves-teal">Publication Options</a></li>
+
+            <li class="bold"><a href="subscription.html" class="waves-effect waves-teal">Subcription Options</a></li>
+
+            <li class="bold"><a href="javadocs/index.html" class="waves-effect waves-teal">Java Documentation</a></li>
+
+        </ul>
+    </header>
+    <main>
+        <div class="section" id="index-banner">
+            <div class="container">
+                <div class="row">
+                    <div class="col s12 m9">
+                        <h2 class="header center-on-small-only">Getting Started</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <!--  Outer row  -->
+            <div class="row">
+                <div class="section col s12 m9 l10">
+
+                    <div id="installation" class="row scrollspy">
+                        <h4 class="col s12 header">Installation</h4>
+                        <div class="col s12">
+                            <b>In Gradle</b>
+                            <p>Add dependencies to your build.gradle</p>
+<pre><code class="grade">dependencies {
+    compile 'com.robocreative.android:robo-common:1.0'
+    compile 'com.robocreative.android:robo-messaging:1.0'
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="message" class="row scrollspy">
+                        <h4 class="col s12 header">Defining Message</h4>
+                        <div class="col s12">
+                            <p>Every message has to be implementation of interface com.robo.messaging.Message. There is also an abstract class named com.robo.messaging.AbstractMessage providing the base for implementing Message. Below is an example:</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.messaging.AbstractMessage;
+
+public class MyMessage extends AbstractMessage&lt;String&gt; {
+
+    protected MyMessage(String content) {
+        super(content);
+    }
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="subscriber" class="row scrollspy">
+                        <h4 class="col s12 header">Creating Subscriber</h4>
+                        <div class="col s12">
+                            <p>Create a subscriber that receives messages of MyMessage</p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.util.Log;
+
+import com.robo.messaging.MessageBus;
+import com.robo.messaging.Subscriber;
+
+public class MySubscriber {
+
+    private MessageBus mMessageBus;
+
+    public MySubscriber(MessageBus messageBus) {
+        mMessageBus = messageBus;
+    }
+
+    public void doSubscribe() {
+        mMessageBus.subscribe(new Subscriber&lt;MyMessage&gt;() {
+            @Override
+            public void receive(MyMessage message) {
+                Log.d("MessageBus", "Received message: " + message.getContent());
+            }
+        });
+    }
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="publisher" class="row scrollspy">
+                        <h4 class="col s12 header">Creating Publisher</h4>
+                        <div class="col s12">
+                            <p>Create a publisher that publishes a message of MyMessage</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.messaging.MessageBus;
+
+public class MyPublisher {
+
+    private MessageBus mMessageBus;
+
+    public MyPublisher(MessageBus messageBus) {
+        mMessageBus = messageBus;
+    }
+
+    public void doPublish(String content) {
+        mMessageBus.publish(new MyMessage(content));
+    }
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="pubsub" class="row scrollspy">
+                    <h4 class="col s12 header">Lauching the Test</h4>
+                    <div class="col s12">
+                        <p>Place following statements inside your application to launch the first test:</p>
+<pre><code class="java">MessageBus messageBus = new MessageBusImp();
+
+MySubscriber subscriber = new MySubscriber(messageBus);
+subscriber.doSubscribe();
+
+MyPublisher publisher = new MyPublisher(messageBus);
+publisher.doPublish("Hello world!");</code></pre>
+                        <p>That's how to quickly use Message Bus in minutes. You can find more interesting features in upcoming pages.</p>
+                    </div>
+                    </div>
+
+                    <div id="further-reading" class="row scrollspy">
+                        <div class="col s12">
+                            <h4 class="header">Further Reading</h4>
+                            <p>
+                            <div class="collection">
+                                <a class="collection-item" href="publication.html">Publication Options</a>
+                                <a class="collection-item" href="subscription.html">Subscription Options</a>
+                            </div>
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Table of contents -->
+                <div class="col hide-on-small-only m3 l2">
+                    <div class="toc-wrapper">
+                        <div style="height: 1px;">
+                            <ul class="table-of-contents">
+                                <li><a href="#installation">Installation</a></li>
+                                <li><a href="#message">Defining Message</a></li>
+                                <li><a href="#subscriber">Creating Subscriber</a></li>
+                                <li><a href="#publisher">Creating Publisher</a></li>
+                                <li><a href="#pubsub">Launching the Test</a></li>
+                                <li><a href="#further-reading">Further Reading</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+    <footer class="page-footer">
+        <div class="footer-copyright">
+            <div class="container">
+                © 2016 Robo Creative. All rights reserved.
+            </div>
+        </div>
+    </footer>
+    <!--  Scripts-->
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script>
+        if (!window.jQuery) { document.write('<script src="js/jquery-2.1.1.min.js"><\/script>'); }
+    </script>
+    <script src="js/jquery.timeago.min.js"></script>
+    <script src="js/materialize.js"></script>
+    <script src="js/init.js"></script>
+</body>
+</html>                

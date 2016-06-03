@@ -1,0 +1,428 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="description" content="Quickly get started with Robo MVP.">
+    <title>Subscription Options - Message Bus</title>
+    <!-- Favicons-->
+    <link rel="apple-touch-icon-precomposed" href="images/favicon/apple-touch-icon-152x152.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="images/favicon/mstile-144x144.png">
+    <link rel="icon" href="images/favicon/favicon-32x32.png" sizes="32x32">
+    <!--  Android 5 Chrome Color-->
+    <meta name="theme-color" content="#4CAF50">
+    <!-- CSS-->
+    <!-- CSS-->
+    <link href="css/androidstudio.css" rel="stylesheet">
+    <link href="css/site.css" type="text/css" rel="stylesheet" media="screen,projection">
+    <link href="http://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css">
+    <script src="js/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <div class="container"><a href="#" data-activates="nav-mobile" class="button-collapse top-nav"><i class="mdi-navigation-menu"></i></a></div>
+        <ul id="nav-mobile" class="side-nav fixed">
+            <li class="logo">
+                <a id="logo-container" href="index.html" class="brand-logo">
+                    <object id="front-page-logo" type="image/png" data="images/logo-small.png" />Logo</object>
+                </a>
+            </li>
+
+            <!-- GETTING STARTED -->
+            <li class="bold"><a href="getting-started.html" class="waves-effect waves-teal">Getting Started</a></li>
+
+            <li class="bold"><a href="publication.html" class="waves-effect waves-teal">Publication Options</a></li>
+
+            <li class="bold active"><a href="subscription.html" class="waves-effect waves-teal">Subscription Options</a></li>
+
+            <li class="bold"><a href="javadocs/index.html" class="waves-effect waves-teal">Java Documentation</a></li>
+        </ul>
+    </header>
+    <main>
+        <div class="section" id="index-banner">
+            <div class="container">
+                <div class="row">
+                    <div class="col s12 m9">
+                        <h2 class="header center-on-small-only">Subscription Options</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <!--  Outer row  -->
+            <div class="row">
+                <div class="section col s12 m9 l10">
+
+                    <div id="default" class="row scrollspy">
+                        <h4 class="col s12 header">Default Options</h4>
+                        <div class="col s12">
+                            <p>Use this shortest method to subscribe to the bus with all default options. In which:</p>
+                            <ul class="collection">
+                                <li class="collection-item">Priority is zero.</li>
+                                <li class="collection-item">Child messages are also accepted.</li>
+                                <li class="collection-item">No historic messages.</li>
+                                <li class="collection-item">Messages are delivered by publisher’s thread.</li>
+                                <li class="collection-item">Message Bus maintains a weak reference to subscriber.</li>
+                            </ul>
+                            <h5>Sample</h5>
+<pre><code class="java">package com.example.myapplication;
+
+import android.util.Log;
+
+import com.robo.messaging.MessageBus;
+import com.robo.messaging.Subscriber;
+
+public class MySubscriber {
+
+    private MessageBus mMessageBus;
+
+    public MySubscriber(MessageBus messageBus) {
+        mMessageBus = messageBus;
+    }
+
+    public void doSubscribe() {
+        mMessageBus.subscribe(new Subscriber&lt;MyMessage&gt;() {
+            @Override
+            public void receive(MyMessage message) {
+                Log.d("MessageBus", "Received message: " + message.getContent());
+            }
+        });
+    }
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="priority" class="row scrollspy">
+                        <h4 class="col s12 header">Subscription Priority</h4>
+                        <div class="col s12">
+                            <p>Use this option to specify priority of subscriber. The lower number, the higher priority. The higher priority, the sooner the subscriber receives messages than the other. Default is zero.</p>
+                            <h5>Sample</h5>
+<pre><code class="java">package com.example.myapplication;
+
+import android.util.Log;
+
+import com.robo.messaging.MessageBus;
+import com.robo.messaging.Subscriber;
+
+public class MySubscriber {
+
+    private MessageBus mMessageBus;
+
+    public MySubscriber(MessageBus messageBus) {
+        mMessageBus = messageBus;
+    }
+
+    public void doSubscribeWithPriority() {
+        mMessageBus.subscribe(new Subscriber&lt;MyMessage&gt;() {
+            @Override
+            public void receive(MyMessage message) {
+                Log.d("MessageBus", "Received first");
+            }
+        }, 0); // lower number, higher priority.
+
+        mMessageBus.subscribe(new Subscriber&lt;MyMessage&gt;() {
+            @Override
+            public void receive(MyMessage message) {
+                Log.d("MessageBus", "Received last");
+            }
+        }, 1); // lower priority than the subscriber above.
+    }
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="child-messages" class="row scrollspy">
+                        <h4 class="col s12 header">Receiving Child Messages</h4>
+                        <div class="col s12">
+                            <p>Use this option to specify whether the subscriber accepts messages which derivate from the subscribed message type or not. Default is true.</p>
+                            <h5>Sample</h5>
+                            <p>Create a child message as derivative of MyMessage as below:</p>
+<pre><code class="java">package com.example.myapplication;
+
+public class MyChildMessage extends MyMessage {
+
+    protected MyChildMessage(String content) {
+        super(content);
+    }
+}</code></pre>
+                            <p>In the subscriber, subscribe to MyMessage with both options: accepting child messages and not.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.util.Log;
+
+import com.robo.messaging.MessageBus;
+import com.robo.messaging.Subscriber;
+
+public class MySubscriber {
+
+    private MessageBus mMessageBus;
+
+    public MySubscriber(MessageBus messageBus) {
+        mMessageBus = messageBus;
+    }
+
+    public void doSubscribeWithChildMessages() {
+        mMessageBus.subscribe(new Subscriber&lt;MyMessage&gt;() {
+            @Override
+            public void receive(MyMessage myMessage) {
+                Log.d("MessageBus", "Received message: " + myMessage.getContent());
+            }
+        }); // default is true, accepts child messages.
+
+        mMessageBus.subscribe(new Subscriber&lt;MyMessage&gt;() {
+            @Override
+            public void receive(MyMessage message) {
+                throw new IllegalStateException("This message should not be received");
+            }
+        }, 0, false); // false => refuses child messages.
+    }
+}</code></pre>
+                            <p>Now let the publisher publish a message of MyChildMessage:</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.messaging.MessageBus;
+
+public class MyPublisher {
+
+    private MessageBus mMessageBus;
+
+    public MyPublisher(MessageBus messageBus) {
+        mMessageBus = messageBus;
+    }
+
+    public void doPublishChildMessage() {
+        mMessageBus.publish(new MyChildMessage("The child message"));
+    }
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="historic" class="row scrollspy">
+                        <h4 class="col s12 header">Receiving Historic Messages</h4>
+                        <div class="col s12">
+                            <p>Use this option to specify whether the subscriber also receives historic messages or not. Default is false.</p>
+                            <h5>Sample</h5>                            
+                            <p>First, let the publisher publish a message with the option to keep the message in history after sending.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.messaging.MessageBus;
+
+public class MyPublisher {
+
+    private MessageBus mMessageBus;
+
+    public MyPublisher(MessageBus messageBus) {
+        mMessageBus = messageBus;
+    }
+
+    public void doPublishAndKeepInHistory() {
+        // keep message in history by setting second param to true.
+        mMessageBus.publish(new MyMessage("Published and kept in history"), true);
+    }
+}</code></pre>
+                            <p>Then, let subscriber subscribe to the message with the option to receive historic messages.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.util.Log;
+
+import com.robo.messaging.MessageBus;
+import com.robo.messaging.Subscriber;
+
+public class MySubscriber {
+
+    private MessageBus mMessageBus;
+
+    public MySubscriber(MessageBus messageBus) {
+        mMessageBus = messageBus;
+    }
+
+    public void doSubscribeHistoricMessages() {
+        // subscribes with option to receive historic messages.
+        mMessageBus.subscribe(new Subscriber&lt;MyMessage&gt;() {
+            @Override
+            public void receive(MyMessage message) {
+                Log.d("MessageBus", "Received message: " + message.getContent());
+                // you can remove the message from history after receiving
+                mMessageBus.remove(message);
+            }
+        }, 0, false, true); // true => receives historic messages.
+
+        // you can also clear all messages in history if necessary
+        mMessageBus.clearHistory();
+    }
+}</code></pre>
+                            <p>The final execution code looks like following snippet. Note that the publisher publishes message before the subscriber subscribing.</p>
+<pre><code class="java">MessageBus messageBus = new MessageBusImp();
+
+MyPublisher publisher = new MyPublisher(messageBus);
+publisher.doPublishAndKeepInHistory("Hello world!");
+
+MySubscriber subscriber = new MySubscriber(messageBus);
+subscriber.doSubscribeHistoricMessages();</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="delivery-thread" class="row scrollspy">
+                        <h4 class="col s12 header">Specifying Delivery Thread</h4>
+                        <div class="col s12">
+                            <p>Use this option to specify thread used for delivering messages. In which:</p>
+                            <ul class="collection">
+                                <li class="collection-item"><b>Publisher:</b> Publisher’s thread will be used to deliver messages.</li>
+                                <li class="collection-item"><b>Background:</b> A different thread than subscriber's thread will be used to deliver messages.</li>
+                                <li class="collection-item"><b>UI:</b> The main UI thread will be used to deliver messages.</li>
+                            </ul>
+                            <h5>Sample</h5>
+<pre><code class="java">package com.example.myapplication;
+
+import android.util.Log;
+
+import com.robo.messaging.MessageBus;
+import com.robo.messaging.Subscriber;
+import com.robo.messaging.ThreadOption;
+
+public class MySubscriber {
+
+    private MessageBus mMessageBus;
+
+    public MySubscriber(MessageBus messageBus) {
+        mMessageBus = messageBus;
+    }
+
+    public void doSubscribeUsingPublisherThread() {
+        mMessageBus.subscribe(new Subscriber&lt;MyMessage&gt;() {
+            @Override
+            public void receive(MyMessage message) {
+                Log.d("MessageBus", "Received message from publisher's thread");
+            }
+        }, 0, false, true, ThreadOption.PUBLISHER); // default is PUBLISHER already.
+    }
+
+    public void doSubscribeUsingBackgroundThread() {
+        mMessageBus.subscribe(new Subscriber&lt;MyMessage&gt;() {
+            @Override
+            public void receive(MyMessage message) {
+                Log.d("MessageBus", "Received message from background thread");
+            }
+        }, 0, false, true, ThreadOption.BACKGROUND); // use different thread to subscriber's.
+    }
+
+    public void doSubscribeUsingUIThread() {
+        mMessageBus.subscribe(new Subscriber&lt;MyMessage&gt;() {
+            @Override
+            public void receive(MyMessage message) {
+                Log.d("MessageBus", "Received message from UI thread");
+            }
+        }, 0, false, true, ThreadOption.UI); // use main UI thread to deliver messages.
+    }
+}</code></pre>
+                            <p>Now just let publisher publish a message as usual. No more complex code logic required. Message Bus will take care of the delivery.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.messaging.MessageBus;
+
+public class MyPublisher {
+
+    private MessageBus mMessageBus;
+
+    public MyPublisher(MessageBus messageBus) {
+        mMessageBus = messageBus;
+    }
+
+    public void doPublish(String content) {
+        mMessageBus.publish(new MyMessage(content));
+    }
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="keeping-subscriber-alive" class="row scrollspy">
+                        <h4 class="col s12 header">Keeping Subscriber Alive</h4>
+                        <div class="col s12">
+                            <p>Use this option to specify whether the Message Bus maintains a strong reference to the subscriber or not. Default is false.</p>
+                            <blockquote>
+                                Theoretically, a weak-referenced subscriber does not need manual cancellation of subscription. When the subscriber is collected by GC, its subscription will be automatically removed from the bus. However, it's strongly recommended to always manually cancel subscription when no longer needed.
+                            </blockquote>
+                            <h5>Sample</h5>
+<pre><code class="java">package com.example.myapplication;
+
+import android.util.Log;
+
+import com.robo.messaging.MessageBus;
+import com.robo.messaging.Subscriber;
+import com.robo.messaging.ThreadOption;
+
+public class MySubscriber {
+
+    private MessageBus mMessageBus;
+    private Subscriber&lt;MyMessage&gt; mSubscriber;
+
+    public MySubscriber(MessageBus messageBus) {
+        mMessageBus = messageBus;
+    }
+
+    public void doSubscribeWithKeepingSubscribeAlive() {
+
+        mSubscriber = new Subscriber&lt;MyMessage&gt;() {
+            @Override
+            public void receive(MyMessage message) {
+                Log.d("MessageBus", "Received message: " + message.getContent());
+            }
+        };
+
+        // maintains a strong reference to subscriber. The last parameter is the thing.
+        mMessageBus.subscribe(mSubscriber, 0, false, true, ThreadOption.PUBLISHER, true);
+    }
+
+    public void unsubscribe() {
+        // you also need to manually cancel the subscription of this strong-referenced subscriber.
+        // we strongly recommend you to manually cancel subscription of both strong-referenced and
+        // weak-referenced subscribers, as we don't know exactly when the GC actually collects the
+        // weak-referenced subscribers. Keeping subscription for a destroyed subscriber might lead
+        // to weird application behaviors.
+        mMessageBus.unsubscribe(mSubscriber);
+    }
+}</code></pre>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Table of contents -->
+                <div class="col hide-on-small-only m3 l2">
+                    <div class="toc-wrapper">
+                        <div style="height: 1px;">
+                            <ul class="table-of-contents">
+                                <li><a href="#default">Default Options</a></li>
+                                <li><a href="#priority">Subscription Priority</a></li>
+                                <li><a href="#child-messages">Child Messages</a></li>
+                                <li><a href="#historic">Historic Messages</a></li>
+                                <li><a href="#delivery-thread">Delivery Thread</a></li>
+                                <li><a href="#keeping-subscriber-alive">Keeping Subscriber Alive</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+    <footer class="page-footer">
+        <div class="footer-copyright">
+            <div class="container">
+                © 2016 Robo Creative. All rights reserved.
+            </div>
+        </div>
+    </footer>
+    <!--  Scripts-->
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script>
+        if (!window.jQuery) { document.write('<script src="js/jquery-2.1.1.min.js"><\/script>'); }
+    </script>
+    <script src="js/jquery.timeago.min.js"></script>
+    <script src="js/materialize.js"></script>
+    <script src="js/init.js"></script>
+</body>
+</html>                

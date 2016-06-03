@@ -1,0 +1,365 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="description" content="Quickly get started with Robo MVP.">
+    <title>Presenter Features - Robo MVP</title>
+    <!-- Favicons-->
+    <link rel="apple-touch-icon-precomposed" href="images/favicon/apple-touch-icon-152x152.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="images/favicon/mstile-144x144.png">
+    <link rel="icon" href="images/favicon/favicon-32x32.png" sizes="32x32">
+    <!--  Android 5 Chrome Color-->
+    <meta name="theme-color" content="#4CAF50">
+    <!-- CSS-->
+    <link href="css/androidstudio.css" rel="stylesheet">
+    <link href="css/site.css" type="text/css" rel="stylesheet" media="screen,projection">
+    <link href="http://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css">
+    <script src="js/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <div class="container"><a href="#" data-activates="nav-mobile" class="button-collapse top-nav"><i class="mdi-navigation-menu"></i></a></div>
+        <ul id="nav-mobile" class="side-nav fixed">
+            <li class="logo">
+                <a id="logo-container" href="index.html" class="brand-logo">
+                    <object id="front-page-logo" type="image/png" data="images/robo-mvp-logo-small.png" />Logo</object>
+                </a>
+            </li>
+            <li class="bold"><a href="getting-started.html" class="waves-effect waves-teal">Getting Started</a></li>
+            <li class="bold"><a href="dependency-injection.html" class="waves-effect waves-teal">Dependency Injection</a></li>
+            <li class="bold"><a href="annotation-processor.html" class="waves-effect waves-teal">Annotation Processor</a></li>
+            <li class="bold"><a href="view-features.html" class="waves-effect waves-teal">View Features</a></li>
+            <li class="bold"><a href="view-types.html" class="waves-effect waves-teal">View Types</a></li>
+            <li class="bold active"><a href="presenter-features.html" class="waves-effect waves-teal">Presenter Features</a></li>
+            <li class="bold"><a href="variants.html" class="waves-effect waves-teal">Variants</a></li>
+            <li class="bold"><a href="#" class="waves-effect waves-teal">Demo Center (Coming Soon)</a></li>
+            <li class="bold"><a href="javadocs/index.html" class="waves-effect waves-teal">Java Documentation</a></li>
+        </ul>
+    </header>
+    <main>
+        <div class="section" id="index-banner">
+            <div class="container">
+                <div class="row">
+                    <div class="col s12 m9">
+                        <h2 class="header center-on-small-only">Presenter Features</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <!--  Outer row  -->
+            <div class="row">
+                <div class="section col s12 m9 l10">
+
+                    <div id="communication" class="row scrollspy">
+                        <h4 class="col s12 header">Cross-presenter Communication</h4>
+                        <div class="col s12">
+                            <p>In addition to decoupling application logic from UI, Robo MVP also help you remove strong references between UI stuffs, which is usually complicated and makes your application vulnerable to memory leak.</p>
+                            <p>Robo MVP offers Message Bus for a better way of communication. In which, every presenter can communicate with each other without any strong references between them. Thus makes it very easy to add or remove UI components.</p>
+                            <blockquote>Message Bus is another product from Robo Creative. Its detailed information and brief instructions can be found <a href="https://robo-creative.github.io/messagebus/index.html">here</a>.</blockquote>
+
+                            <h5>Sample</h5>
+                            <p>Defines a message that encapsulates a content of string similar to following snippet</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.messaging.AbstractMessage;
+
+public class MyMessage extends AbstractMessage&lt;String&gt; {
+
+    protected MyMessage(String content) {
+        super(content);
+    }
+}</code></pre>
+                            <p>The presenter below acts as a publisher that publishes a message when the view becomes ready.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.mvp.AbstractPresenter;
+import com.robo.mvp.View;
+
+public class PublisherPresenter extends AbstractPresenter&lt;View&gt; {
+    @Override
+    protected void onViewSet(View view) {
+        view.getListeners().set(View.OnReadyListener.class, new View.OnReadyListener() {
+            @Override
+            public void onReady() {
+                mMessageBus.publish(new MyMessage(&quot;Hi there!&quot;));
+            }
+        });
+    }
+}</code></pre>
+                            <p>In another presenter, subscribe to the message. The subscriber will receive message whenever a publisher publishes a MyMessage.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.util.Log;
+
+import com.robo.messaging.Subscriber;
+import com.robo.mvp.AbstractPresenter;
+import com.robo.mvp.View;
+
+public class SubscriberPresenter extends AbstractPresenter&lt;View&gt; {
+    @Override
+    protected void onViewSet(View view) {
+        mMessageBus.subscribe(new Subscriber&lt;MyMessage&gt;() {
+            @Override
+            public void receive(MyMessage message) {
+                Log.d(&quot;Messaging&quot;, &quot;Received message: &quot; + message.getContent());
+            }
+        });
+    }
+}</code></pre>
+                            <h5>Cancellation of Subscriptions</h5>
+                            <p>Message Bus automatically cancels all subscriptions made by a presenter when the presenter being destroyed, except the ones with keepSubscriberAlive = true. Meaning you don't need to manually cancel any subscription whose keepSubscriberAlive = false (default value).</p>
+                            <p>The option keepSubscriberAlive is specially helpful in case you want to use a long-lived subscriber that receives messages during entire application life cycle and can only be cancelled manually by yourself. An example of this is the audit logger being intended for logging all messages out for debugging purpose. In splash screen, you subscribe the logger to the bus. When application exits, you cancel its subscription to release it.</p>
+                            <b>Sample</b>
+                            <p>The MessageLogger below intended for logging all messages among components. It implements Subscriber and accepts com.robo.messaging.Message - the top level interface so it will be able to receive messages of all types. Note that we are going to use it as a singleton component.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.util.Log;
+
+import com.robo.messaging.Message;
+import com.robo.messaging.Subscriber;
+
+/**
+ * Intended for logging all messages transferred among components in application.
+ */
+public class MessageLogger implements Subscriber&lt;Message&gt; {
+
+    private static MessageLogger sInstance;
+
+    private MessageLogger() {
+
+    }
+
+    /**
+     * Creates and returns a singleton instance of this logger.
+     */
+    public static synchronized MessageLogger instance() {
+        if (null == sInstance) {
+            sInstance = new MessageLogger();
+        }
+        return sInstance;
+    }
+
+    @Override
+    public void receive(Message message) {
+        Log.d(&quot;Messaging&quot;, &quot;Received message: &quot; + message.getContent().toString());
+    }
+}</code></pre>
+                            <p>In presenter of the splash screen, subscribe the singleton MessageLogger to the bus. You might also notice that acceptsChildMessages, receiveHistoricMessages and keepSubscriberAlive are all set to True.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.messaging.ThreadOption;
+import com.robo.mvp.AbstractPresenter;
+import com.robo.mvp.View;
+
+public class SplashPresenter extends AbstractPresenter&lt;SplashView&gt; {
+
+    @Override
+    protected void onViewSet(SplashView view) {
+        /**
+         * Subscribes the global logger so that it can receive all messages among components.
+         * For the logging purpose, it's fine to use background thread with lowest priority to
+         * reduce impacts to application performance.
+         */
+        mMessageBus.subscribe(MessageLogger.instance(), Integer.MAX_VALUE, true, true, ThreadOption.BACKGROUND, true);
+
+        view.getListeners().set(View.OnReadyListener.class, new View.OnReadyListener() {
+            @Override
+            public void onReady() {
+                // initializes components then navigates user to main screen when everything ready.
+            }
+        });
+    }
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="navigation" class="row scrollspy">
+                        <h4 class="col s12 header">Navigation</h4>
+                        <div class="col s12">
+                            <p>Robo MVP decouples navigation from UI stuffs to make your application more testing-friendly. To navigate among screens, you can use Command. Below is an example of navigation command, provided in library robo-navigation-commands. You can also create any command on your own.</p>
+<pre><code class="java">/**
+ * Copyright (c) 2016 Robo Creative - https://robo-creative.github.io.
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+package com.robo.navigation.commands;
+
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+
+import com.robo.navigation.Command;
+
+/**
+ * Starts a certain activity on execution.
+ *
+ * @author robo-admin
+ *
+ */
+public class StartActivity implements Command&lt;StartActivity.Parameter&gt;{
+
+    @Override
+    public void execute(Parameter parameter) {
+        Intent intent = new Intent(parameter.source, parameter.target);
+        if (null != parameter.extras) {
+            intent.putExtras(parameter.extras);
+        }
+        parameter.source.startActivity(intent);
+    }
+
+    public static class Parameter {
+        public Context source;
+        public Bundle extras;
+        public Class&lt;?&gt; target;
+
+        public Parameter(Context source, Class&lt;?&gt; target) {
+            this(source, target, null);
+        }
+
+        public Parameter(Context source, Class&lt;?&gt; target, Bundle extras) {
+            this.source = source;
+            this.target = target;
+            this.extras = extras;
+        }
+    }
+}</code></pre>
+                            <p>There are two different ways of executing a command inside a presenter:</p>
+                            <p>
+                                <ul class="collection">
+                                    <li class="collection-item">Using <a href="dependency-injection.html">Dependency Injection</a> to inject the command as a collaborator of presenter. Then execute command in presenter’s logic.</li>
+                                    <li class="collection-item">Executing commands via ApplicationController. The ApplicationController is already a collaborator of Presenter, intended for executing commands and resolving command instances at runtime.</li>
+                                </ul>
+                            </p>
+                            <p>In both ways you can easily mock Command or ApplicationController to concentrate on testing UI logic in Presenter.</p>
+                            <b>Example of using Dependency Injection</b>
+                            <p>In this example we use Google Guice (supported in library robo-mvp-guice) to inject command via presenter's constructor.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.google.inject.Inject;
+import com.robo.mvp.AbstractPresenter;
+import com.robo.navigation.Command;
+import com.robo.navigation.commands.StartActivity;
+
+public class LoginPresenter extends AbstractPresenter&lt;LoginView&gt; {
+
+    private Command mGoToMainCommand;
+
+    @Inject
+    public LoginPresenter(Command goToMainCommand) {
+        mGoToMainCommand = goToMainCommand;
+    }
+
+    private void navigateToMainScreen() {
+        mGoToMainCommand.execute(new StartActivity.Parameter(mView.getContext(),
+                MainActivity.class));
+    }
+}</code></pre>
+                            <p>You can also use named binding option to inject command to presenter by name. It's a Guice's feature.</p>
+                            <p>Use a derivative of AbstractModule to register command to the container.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.name.Names;
+import com.robo.navigation.Command;
+import com.robo.navigation.commands.StartActivity;
+
+public class CommandModule extends AbstractModule {
+    @Override
+    protected void configure() {
+        bind(Command.class).to(StartActivity.class);
+    }
+}</code></pre>
+                            <b>Example of using Application Controller</b>          
+                            <p>Below is a simple way of using Application Controller to resolve and execute command.</p>                  
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.mvp.AbstractPresenter;
+import com.robo.navigation.commands.StartActivity;
+
+public class LoginPresenter extends AbstractPresenter&lt;LoginView&gt; {
+
+    private void navigateToMainScreen() {
+        // the ApplicationController is already a collaborator of this presenter.
+        mAppController.execute(StartActivity.class, new StartActivity.Parameter(mView.getContext(),
+                MainActivity.class));
+    }
+}</code></pre>
+                            <p>If you are using a Dependency Injection library (e.g Google Guice), the Application Controller also supports resolving command by name - a feature that is not available without the help of Dependency Injection. Below is an example:</p>                            
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.mvp.AbstractPresenter;
+import com.robo.navigation.Command;
+import com.robo.navigation.commands.StartActivity;
+
+public class LoginPresenter extends AbstractPresenter&lt;LoginView&gt; {
+
+    private void navigateToMainScreen() {
+
+        // uses ApplicationController to resolve command named goToMain and execute it.
+        mAppController.execute(Command.class, &quot;goToMain&quot;, new StartActivity.Parameter(mView.getContext(),
+                MainActivity.class));
+    }
+}</code></pre>
+                            <p>You can use a derivative of AbstractModule to register command to the container.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.name.Names;
+import com.robo.navigation.Command;
+import com.robo.navigation.commands.StartActivity;
+
+public class CommandModule extends AbstractModule {
+    @Override
+    protected void configure() {
+        bind(Command.class).annotatedWith(Names.named(&quot;goToMain&quot;)).to(StartActivity.class);
+    }
+}</code></pre>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Table of contents -->
+                <div class="col hide-on-small-only m3 l2">
+                    <div class="toc-wrapper">
+                        <div style="height: 1px;">
+                            <ul class="table-of-contents">
+                                <li><a href="#communication">Communication</a></li>
+                                <li><a href="#navigation">Navigation</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>    <footer class="page-footer">
+        <div class="footer-copyright">
+            <div class="container">
+                © 2016 Robo Creative. All rights reserved.
+            </div>
+        </div>
+    </footer>
+    <!--  Scripts-->
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/jquery.timeago.min.js"></script>
+    <script src="js/materialize.js"></script>
+    <script src="js/init.js"></script>
+</body>
+</html>                

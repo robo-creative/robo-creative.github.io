@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="description" content="Working with Variants in Robo MVP.">
+    <title>Annotation Processor - Robo MVP</title>
+    <!-- Favicons-->
+    <link rel="apple-touch-icon-precomposed" href="images/favicon/apple-touch-icon-152x152.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="images/favicon/mstile-144x144.png">
+    <link rel="icon" href="images/favicon/favicon-32x32.png" sizes="32x32">
+    <!--  Android 5 Chrome Color-->
+    <meta name="theme-color" content="#4CAF50">
+    <!-- CSS-->
+    <link href="css/androidstudio.css" rel="stylesheet">
+    <link href="css/site.css" type="text/css" rel="stylesheet" media="screen,projection">
+    <link href="http://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css">
+    <script src="js/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <div class="container"><a href="#" data-activates="nav-mobile" class="button-collapse top-nav"><i class="mdi-navigation-menu"></i></a></div>
+        <ul id="nav-mobile" class="side-nav fixed">
+            <li class="logo">
+                <a id="logo-container" href="index.html" class="brand-logo">
+                    <object id="front-page-logo" type="image/png" data="images/robo-mvp-logo-small.png" />Logo</object>
+                </a>
+            </li>
+            <li class="bold"><a href="getting-started.html" class="waves-effect waves-teal">Getting Started</a></li>
+            <li class="bold"><a href="dependency-injection.html" class="waves-effect waves-teal">Dependency Injection</a></li>
+            <li class="bold active"><a href="annotation-processor.html" class="waves-effect waves-teal">Annotation Processor</a></li>
+            <li class="bold"><a href="view-features.html" class="waves-effect waves-teal">View Features</a></li>
+            <li class="bold"><a href="view-types.html" class="waves-effect waves-teal">View Types</a></li>
+            <li class="bold"><a href="presenter-features.html" class="waves-effect waves-teal">Presenter Features</a></li>
+            <li class="bold"><a href="variants.html" class="waves-effect waves-teal">Variants</a></li>
+            <li class="bold"><a href="#" class="waves-effect waves-teal">Demo Center (Coming Soon)</a></li>
+            <li class="bold"><a href="javadocs/index.html" class="waves-effect waves-teal">Java Documentation</a></li>
+        </ul>
+    </header>
+    <main>
+        <div class="section" id="index-banner">
+            <div class="container">
+                <div class="row">
+                    <div class="col s12 m9">
+                        <h2 class="header center-on-small-only">Annotation Processor</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <!--  Outer row  -->
+            <div class="row">
+                
+                <div class="section col s12 m9 l10">
+                    <div id="annotation-processor" class="row scrollspy">                        
+                        <p>Robo MVP uses annotation to associate Presenter with View. At runtime, it leans on reflection to collect presenter-view mapping information from annotation marked up on the view. You might want to get rid of your application reading annotation as it's somehow slow, so you can use Annotation Processor to pre-collect mappings at compile time.</p>                        
+                        <b>In Gradle</b>
+                        <p>Add following dependency to your build.gradle:</p>
+<pre><code class="gradle">dependencies {
+    compile 'com.robocreative.android:robo-mvp-processor:1.0'
+}</code></pre>
+                        <p>Note that you also need the plugin 'com.neenbedankt.android-apt' to be sure that Android Studio will pick up generated source from annotation processors as well as it can understand apt configuration for excluding annotation processors from runtime dependencies.</p>
+<pre><code class="gradle">buildscript {
+    dependencies {
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+    }
+}
+
+apply plugin: 'com.neenbedankt.android-apt'</code></pre>
+                        <p>Specify package and name of the pre-compiled mapping collector that you want the compiler to generate for you.</p>
+<pre><code class="gradle">apt {
+    arguments {
+        presenterMappingCollector 'com.example.myapplication.IndexedCollector'
+    }
+}</code></pre>
+                        <p>Also exclude Processor from the packaging.</p>
+<pre><code class="gradle">android {
+    packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+    }
+}</code></pre>
+                        <p>Below is a sample build.gradle for your references</p>
+<pre><code class="gradle">apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion '23.0.1'
+
+    defaultConfig {
+        applicationId 'com.example.myapplication'
+        minSdkVersion 11
+        targetSdkVersion 23
+        versionCode 1
+        versionName 11.0'
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+    }
+}
+
+dependencies {
+    compile 'com.google.inject:guice:3.0:no_aop'
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:support-v4:23.3.0'
+    compile 'com.robocreative.android:robo-common:1.0'
+    compile 'com.robocreative.android:robo-messaging:1.0'
+    compile 'com.robocreative.android:robo-mvp:1.0'
+    compile 'com.robocreative.android:robo-mvp-support-v7:1.0'
+    compile 'com.robocreative.android:robo-mvp-support-v4:1.0'
+    compile 'com.robocreative.android:robo-mvp-processor:1.0'
+    compile 'com.robocreative.android:robo-mvp-guice:1.0'
+    compile 'com.robocreative.android:robo-navigation-commands:1.0'
+}
+
+apt {
+    arguments {
+        presenterMappingCollector 'com.example.myapplication.IndexedCollector'
+    }
+}</code></pre>
+                        <p>Now rebuild your project. If the output window prints messages like "Found presenter for..." and the build does not produce any errors, then everything is setup correctly.</p>
+                        <p>In your bootstrapper, override the method getPresenterMappingCollector() and let it return an instance of the class IndexedCollector generated at compile time.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.mvp.PresenterMappingCollector;
+import com.robo.mvp.guice.AbstractBootstrapper;
+
+public class MyBootstrapper extends AbstractBootstrapper {
+
+    @Override
+    protected PresenterMappingCollector createPresenterMappingCollector() {
+        return new IndexedCollector();
+    }
+}</code></pre>
+                        <p>Now enjoy some speed up. Note that the difference might not be day and night. But it's actually faster than not using Annotation Processor.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>    <footer class="page-footer">
+        <div class="footer-copyright">
+            <div class="container">
+                © 2016 Robo Creative. All rights reserved.
+            </div>
+        </div>
+    </footer>
+    <!--  Scripts-->
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="js/jquery.timeago.min.js"></script>
+    <script src="js/materialize.js"></script>
+    <script src="js/init.js"></script>
+</body>
+</html>                

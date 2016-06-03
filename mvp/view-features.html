@@ -1,0 +1,405 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="description" content="Quickly get started with Robo MVP.">
+    <title>View Features - Robo MVP</title>
+    <!-- Favicons-->
+    <link rel="apple-touch-icon-precomposed" href="images/favicon/apple-touch-icon-152x152.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="images/favicon/mstile-144x144.png">
+    <link rel="icon" href="images/favicon/favicon-32x32.png" sizes="32x32">
+    <!--  Android 5 Chrome Color-->
+    <meta name="theme-color" content="#4CAF50">
+    <!-- CSS-->
+    <link href="css/androidstudio.css" rel="stylesheet">
+    <link href="css/site.css" type="text/css" rel="stylesheet" media="screen,projection">
+    <link href="http://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css">
+    <script src="js/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <div class="container"><a href="#" data-activates="nav-mobile" class="button-collapse top-nav"><i class="mdi-navigation-menu"></i></a></div>
+        <ul id="nav-mobile" class="side-nav fixed">
+            <li class="logo">
+                <a id="logo-container" href="index.html" class="brand-logo">
+                    <object id="front-page-logo" type="image/png" data="images/robo-mvp-logo-small.png" />Logo</object>
+                </a>
+            </li>
+
+            <li class="bold"><a href="getting-started.html" class="waves-effect waves-teal">Getting Started</a></li>
+            <li class="bold"><a href="dependency-injection.html" class="waves-effect waves-teal">Dependency Injection</a></li>
+            <li class="bold"><a href="annotation-processor.html" class="waves-effect waves-teal">Annotation Processor</a></li>
+            <li class="bold active"><a href="view-features.html" class="waves-effect waves-teal">View Features</a></li>
+            <li class="bold"><a href="view-types.html" class="waves-effect waves-teal">View Types</a></li>
+            <li class="bold"><a href="presenter-features.html" class="waves-effect waves-teal">Presenter Features</a></li>
+            <li class="bold"><a href="variants.html" class="waves-effect waves-teal">Variants</a></li>
+            <li class="bold"><a href="#" class="waves-effect waves-teal">Demo Center (Coming Soon)</a></li>
+            <li class="bold"><a href="javadocs/index.html" class="waves-effect waves-teal">Java Documentation</a></li>
+        </ul>
+    </header>
+    <main>
+        <div class="section" id="index-banner">
+            <div class="container">
+                <div class="row">
+                    <div class="col s12 m9">
+                        <h2 class="header center-on-small-only">View Features</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <!--  Outer row  -->
+            <div class="row">
+                <div class="section col s12 m9 l10">
+
+                    <div id="listeners" class="row scrollspy">
+                        <h4 class="col s12 header">Event Listeners</h4>
+                        <div class="col s12">
+                            <h5>OnReadyListener</h5>
+                            <p>Every view has a default OnReadyListener with method onReady(). This method is called when the view becomes ready to use</p>
+                            <ul class="collection with-header">
+                                <li class="collection-item">For Activity, this event fired after onCreated().</li>
+                                <li class="collection-item">For Fragment, this event fired after onActivityCreated().</li>
+                            </ul>
+                            <blockquote>
+                                The presenter should not ask the view to do anything when the View is not ready yet.
+                            </blockquote>
+                            <p>Presenter should only register all view's event listeners and subscriptions in onViewSet(). Presenter should NOT call any code statements driving the view before Ready event gets fired.</p>
+                            <b>Sample</b>
+                            <p>
+<pre><code class="java">package com.example.robomvp;
+
+import com.robo.mvp.AbstractPresenter;
+import com.robo.mvp.View;
+
+public class WelcomePresenter extends AbstractPresenter&lt;WelcomeView&gt; {
+
+    @Override
+    protected void onViewSet(WelcomeView view) {
+        view.getListeners().set(View.OnReadyListener.class, new View.OnReadyListener() {
+            @Override
+            public void onReady() {
+                view.showMessage(&quot;Welcome to Robo MVP's world!&quot;);
+            }
+        });
+    }
+}</code></pre>
+                            </p>
+                            <h5>The Listeners</h5>
+                            <p>View also has a Listeners - a collection of event listeners. It helps registration of event listeners less complicated and Robo MVP automatically removes all event listeners when the view being destroyed as well. Below is an example of using Listeners.</p>
+                            <b>Defining Event Listener</b>
+                            <p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.mvp.View;
+
+public interface SampleListenersView extends View {
+
+    void showMessage(String message);
+
+    interface OnButtonClickListener {
+        void onButtonClick();
+    }
+}</code></pre>
+                            </p>
+                            <b>Registering Event Listener</b>
+                            <p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.mvp.AbstractPresenter;
+
+public class SampleListenersPresenter extends AbstractPresenter&lt;SampleListenersView&gt; {
+    @Override
+    protected void onViewSet(final SampleListenersView view) {
+        view.getListeners().set(SampleListenersView.OnButtonClickListener.class, new SampleListenersView.OnButtonClickListener() {
+            @Override
+            public void onButtonClick() {
+                view.showMessage(&quot;You clicked the button&quot;);
+            }
+        });
+    }
+}</code></pre>
+                            </p>
+                            <b>Firing Event</b>
+                            <p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.robo.mvp.AbstractFragment;
+import com.robo.mvp.BindTo;
+
+@BindTo(SampleListenersPresenter.class)
+public class SampleListenersFragment extends AbstractFragment implements SampleListenersView{
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+        view.findViewById(R.id.btn_click_me).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // skip checking existence of the listener if you are pretty sure that it is always set.
+                if (mListeners.has(OnButtonClickListener.class)) {
+                    mListeners.get(OnButtonClickListener.class).onButtonClick();
+                }
+            }
+        });
+        return view;
+    }
+
+    @Override
+    public void showMessage(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+    }
+}</code></pre>
+                            </p>
+
+                            <h5>Using Direct Event Listeners</h5>
+                            <p>You might prefer using direct event listener because it's somehow a little bit faster than firing events via the Listeners (direct call vs. indirect call). You are free to do it with ease. However, view does not automatically remove any direct event listener for you so that you will need to do it manually on destroying view. Below is an example:</p>
+                            <b>Defining Event Listener</b>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.mvp.View;
+
+public interface SampleDirectListenerView extends View {
+
+    void showMessage(String message);
+
+    /**
+     * Sets the listener that listens to ButtonClick event on this view.
+     */
+    void setOnButtonClickListener(OnButtonClickListener listener);
+
+    interface OnButtonClickListener {
+        void onButtonClick();
+    }
+}</code></pre>
+                            <b>Registering Event Listener</b>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.mvp.AbstractPresenter;
+
+public class SampleDirectListenerPresenter extends AbstractPresenter&lt;SampleListenersView&gt; {
+    @Override
+    protected void onViewSet(final SampleDirectListenerView view) {
+        view.setOnButtonClickListener(new SampleDirectListenerView.OnButtonClickListener() {
+            @Override
+            public void onButtonClick() {
+                view.showMessage(&quot;You clicked the button&quot;);
+            }
+        });
+    }
+
+    @Override
+    protected void destroy() {
+        // it's recommended to unregister direct event listeners upon destroying presenter.
+        mView.setOnButtonClickListener(null);
+    }
+}</code></pre>
+                            <b>Firing Event</b>
+<pre><code class="java">package com.example.myapplication;
+
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.robo.mvp.AbstractFragment;
+
+public class SampleDirectListenerFragment extends AbstractFragment implements SampleDirectListenerView {
+
+    private OnButtonClickListener mOnButtonClickListener;
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+        view.findViewById(R.id.btn_click_me).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // skip checking existence of the listener if you are pretty sure that it is always set.
+                if (null != mOnButtonClickListener) {
+                    mOnButtonClickListener.onButtonClick();
+                }
+            }
+        });
+        return view;
+    }
+
+    @Override
+    public void showMessage(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void setOnButtonClickListener(OnButtonClickListener listener) {
+        mOnButtonClickListener = listener;
+    }
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="saving-restoring" class="row scrollspy">
+                        <h4 class="col s12 header">Persisting &amp; Restoring State</h4>
+                        <div class="col s12">
+                            <p>To persist or restore view state when configuration changes, you can use View.OnPersistRestoreListener.</p>
+                            <b>Sample</b>
+                            <p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.os.Bundle;
+
+import com.robo.mvp.AbstractPresenter;
+import com.robo.mvp.View;
+
+public class LoginPresenter extends AbstractPresenter&lt;LoginView&gt; {
+
+    @Override
+    protected void onViewSet(final LoginView view) {
+        view.getListeners().set(View.OnPersistRestoreListener.class, new View.OnPersistRestoreListener() {
+            @Override
+            public void onPersistViewState(Bundle viewStateBundle) {
+                viewStateBundle.putString(&quot;Username&quot;, view.getUsername());
+            }
+
+            @Override
+            public void onRestoreViewState(Bundle savedViewStateBundle) {
+                view.setUsername(savedViewStateBundle.getString(&quot;Username&quot;, &quot;&quot;));
+            }
+        });
+    }
+}</code></pre>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div id="context-provider" class="row scrollspy">
+                        <h4 class="col s12 header">Context Provider</h4>
+                        <div class="col s12">
+                            <p>If you want to access Context or SharedPreferences, you can use interface ContextProvider. This interface provides access to Context, SharedPreferences and ContentResolver. All built-in views in Robo MVP already implemented it.</p>
+                            <b>Sample</b>
+                            <p>Define a view that implements ContextProvider</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.mvp.ContextProvider;
+import com.robo.mvp.View;
+
+public interface PersonalInfoView extends View, ContextProvider {
+
+}</code></pre>
+                            <p>Now the SharedPreferences can be accessed within presenter:</p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import com.robo.mvp.AbstractPresenter;
+
+public class PersonalInfoPresenter extends AbstractPresenter&lt;PersonalInfoView&gt; {
+
+    private Context mContext;
+    private ContentResolver mContentResolver;
+    private SharedPreferences mSharedPreferences;
+
+    @Override
+    protected void onViewSet(final PersonalInfoView view) {
+        mContext = view.getContext();
+        mContentResolver = view.getContentResolver();
+        mSharedPreferences = view.getSharedPreferences(&quot;PersonalInfo&quot;, Context.MODE_PRIVATE);
+        // now all Context, ContentResolver and SharedPreferences are accessible from presenter.
+    }
+
+    @Override
+    public void destroy() {
+        mSharedPreferences = null;
+        mContentResolver = null;
+        mContext = null;
+    }
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="loader-manager-provider" class="row scrollspy">
+                        <h4 class="col s12 header">Loader Manager Provider</h4>
+                        <div class="col s12">
+                            <p>If you want to access LoaderManager, you can use interface LoaderManagerProvider. This interface provides access to LoaderManager. All built-in views in Robo MVP already implemented it.</p>
+                            <b>Sample</b>
+                            <p>Define a list view that implements LoaderManagerProvider.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.mvp.ListView;
+import com.robo.mvp.LoaderManagerProvider;
+
+public interface ProductsView extends ListView&lt;Product&gt;, LoaderManagerProvider{
+
+}</code></pre>
+                            <p>Now the LoaderManager can be accessed within presenter:</p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.app.LoaderManager;
+
+import com.robo.mvp.AbstractPresenter;
+
+public class ProductsPresenter extends AbstractPresenter&lt;ProductsView&gt; {
+
+    private LoaderManager mLoaderManager;
+
+    @Override
+    protected void onViewSet(ProductsView view) {
+        mLoaderManager = view.getLoaderManager();
+        // now loader manager is accessible from this presenter.
+    }
+
+    @Override
+    public void destroy() {
+        mLoaderManager = null;
+    }
+}</code></pre>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Table of contents -->
+                <div class="col hide-on-small-only m3 l2">
+                    <div class="toc-wrapper">
+                        <div style="height: 1px;">
+                            <ul class="table-of-contents">
+                                <li><a href="#listeners">Event Listeners</a></li>
+                                <li><a href="#saving-restoring">Persisting &amp; Restoring State</a></li>
+                                <li><a href="#context-provider">Context Provider</a></li>
+                                <li><a href="#loader-manager-provider">Loader Manager Provider</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>    <footer class="page-footer">
+        <div class="footer-copyright">
+            <div class="container">
+                © 2016 Robo Creative. All rights reserved.
+            </div>
+        </div>
+    </footer>
+    <!--  Scripts-->
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/jquery.timeago.min.js"></script>
+    <script src="js/materialize.js"></script>
+    <script src="js/init.js"></script>
+</body>
+</html>                

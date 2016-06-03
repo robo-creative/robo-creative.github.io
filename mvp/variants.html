@@ -1,0 +1,289 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="description" content="Working with Variants in Robo MVP.">
+    <title>Variants - Robo MVP</title>
+    <!-- Favicons-->
+    <link rel="apple-touch-icon-precomposed" href="images/favicon/apple-touch-icon-152x152.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="images/favicon/mstile-144x144.png">
+    <link rel="icon" href="images/favicon/favicon-32x32.png" sizes="32x32">
+    <!--  Android 5 Chrome Color-->
+    <meta name="theme-color" content="#4CAF50">
+    <!-- CSS-->
+    <link href="css/androidstudio.css" rel="stylesheet">
+    <link href="css/site.css" type="text/css" rel="stylesheet" media="screen,projection">
+    <link href="http://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css">
+    <script src="js/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <div class="container"><a href="#" data-activates="nav-mobile" class="button-collapse top-nav"><i class="mdi-navigation-menu"></i></a></div>
+        <ul id="nav-mobile" class="side-nav fixed">
+            <li class="logo">
+                <a id="logo-container" href="index.html" class="brand-logo">
+                    <object id="front-page-logo" type="image/png" data="images/robo-mvp-logo-small.png" />Logo</object>
+                </a>
+            </li>
+            <li class="bold"><a href="getting-started.html" class="waves-effect waves-teal">Getting Started</a></li>
+            <li class="bold"><a href="dependency-injection.html" class="waves-effect waves-teal">Dependency Injection</a></li>
+            <li class="bold"><a href="annotation-processor.html" class="waves-effect waves-teal">Annotation Processor</a></li>
+            <li class="bold"><a href="view-features.html" class="waves-effect waves-teal">View Features</a></li>
+            <li class="bold"><a href="view-types.html" class="waves-effect waves-teal">View Types</a></li>
+            <li class="bold"><a href="presenter-features.html" class="waves-effect waves-teal">Presenter Features</a></li>
+            <li class="bold active"><a href="variants.html" class="waves-effect waves-teal">Variants</a></li>
+            <li class="bold"><a href="#" class="waves-effect waves-teal">Demo Center (Coming Soon)</a></li>
+            <li class="bold"><a href="javadocs/index.html" class="waves-effect waves-teal">Java Documentation</a></li>
+        </ul>
+    </header>
+    <main>
+        <div class="section" id="index-banner">
+            <div class="container">
+                <div class="row">
+                    <div class="col s12 m9">
+                        <h2 class="header center-on-small-only">Variants</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <!--  Outer row  -->
+            <div class="row">
+                <div class="section col s12 m9 l10">
+                    <div id="overview" class="row scrollspy">
+                        <h4 class="header">Overview</h4>
+                        <p>Robo MVP out-the-box supports both variants: Passive View and Supervising Controller. If you have never heard of those variants, Martin Fowler's articles about <a href="http://martinfowler.com/eaaDev/PassiveScreen.html">Passive View</a> and <a href="http://martinfowler.com/eaaDev/SupervisingPresenter.html">Supervising Controller</a> are some good starts for you.</p>
+                        <p>Depending on your favourite and your development context, you can either go with a variant, or mix both of them them together in your project.</p>
+                    </div>
+                    <div id="passive-view" class="row scrollspy">
+                        <h4 class="header">Passive View</h4>
+                        <p>This variant centralizes application logic and UI logic in Presenter. Thus enables unit testing for both kinds of logic. If you prefer testing all UI logic before making concrete views, Passive View is your choice.</p>
+                        <div class="image-container">
+                            <img src="images/passive-view.png"/>
+                        </div>
+                        <b>Sample</b>                        
+                        <p>Imagine you have a sign-up form allowing user to register account.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.mvp.View;
+
+public interface SignUpView extends View {
+
+    String getFullName();
+
+    String getUsername();
+
+    String getPassword();
+
+    void focusOnFullName();
+
+    void focusOnUserName();
+
+    void focusOnPassword();
+
+    void showError(String message);
+
+    /**
+     * Listens to SignUp event on the view.
+     */
+    interface OnSignUpListener {
+        void onSignUp();
+    }
+}</code></pre>
+                        <p>The presenter is resposible for validating user input, controlling view and interacting with data sources.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.mvp.AbstractPresenter;
+
+public class SignUpPresenter extends AbstractPresenter&lt;SignUpView&gt; {
+    @Override
+    protected void onViewSet(final SignUpView view) {
+        view.getListeners().set(SignUpView.OnSignUpListener.class, new SignUpView.OnSignUpListener() {
+            @Override
+            public void onSignUp() {
+                registerUser(view.getFullName().trim(), view.getUsername().trim(), view.getPassword().trim());
+            }
+        });
+    }
+
+    private void registerUser(String fullName, String username, String password) {
+        if (fullName.isEmpty()) {
+            mView.focusOnFullName();
+            mView.showError(&quot;Full name is required&quot;);
+        } else if (username.isEmpty()) {
+            mView.focusOnUserName();
+            mView.showError(&quot;Username is required&quot;);
+        } else if (password.length() &lt; 6) {
+            mView.focusOnPassword();
+            mView.showError(&quot;Password must have at least six characters&quot;);
+        } else {
+            // everything is OK. Saves user information and navigates user to another screen.
+        }
+    }
+}</code></pre>
+                    </div>
+                    <div id="supervising-controller" class="row scrollspy">
+                        <h4 class="header">Supervising Controller</h4>
+                        <p>This variant allows View to perform some data binding and View can also handle some simple UI logic as well. If you want to skip testing simple UI logic and you want to have a lightweight Presenter, you can go with Supervising Controller.</p>
+                        <div class="image-container">
+                            <img src="images/supervising-controller.png"/>
+                        </div>                                                
+                        <b>Sample</b>
+                        <p>Starting with a model called Account. This model will be used for data displaying purpose.</p>
+<pre><code class="java">package com.example.myapplication;
+
+public class Account {
+
+    private String mFullName;
+    private boolean mGenre;
+    private String mAddress;
+
+    public String getFullName() {
+        return mFullName;
+    }
+
+    public void setFullName(String fullName) {
+        mFullName = fullName;
+    }
+
+    public boolean getGenre() {
+        return mGenre;
+    }
+
+    public void setGenre(boolean genre) {
+        mGenre = genre;
+    }
+
+    public String getAddress() {
+        return mAddress;
+    }
+
+    public void setAddress(String address) {
+        mAddress = address;
+    }
+}</code></pre>
+                        <p>Define a AccountView that displays Account. You may notice that the view accepts Account as generic parameter.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import com.robo.mvp.ContextProvider;
+import com.robo.mvp.LoaderManagerProvider;
+import com.robo.mvp.View;
+
+public interface AccountView extends View&lt;Account&gt;, ContextProvider, LoaderManagerProvider {
+
+}</code></pre>
+                        <p>Do not mind the LoaderManagerProvider and ContextProvider in the view. They are just for working with data source layer underneath.</p>
+                        <p>Now create a presenter for the view. In presenter, we just use LoaderManager to load account information (the model) then give the model to the view.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.app.LoaderManager;
+import android.content.AsyncTaskLoader;
+import android.content.Context;
+import android.content.Loader;
+import android.os.Bundle;
+
+import com.robo.mvp.AbstractPresenter;
+import com.robo.mvp.View;
+
+public class AccountPresenter extends AbstractPresenter&lt;AccountView&gt; {
+    @Override
+    protected void onViewSet(final AccountView view) {
+        view.getListeners().set(View.OnReadyListener.class, new View.OnReadyListener() {
+            @Override
+            public void onReady() {
+                view.getLoaderManager().initLoader(0, Bundle.EMPTY, new AccountLoaderCallback()).forceLoad();
+            }
+        });
+    }
+
+    public class AccountLoaderCallback implements LoaderManager.LoaderCallbacks&lt;Account&gt; {
+
+        @Override
+        public Loader&lt;Account&gt; onCreateLoader(int id, Bundle args) {
+            return new AccountLoader(mView.getContext());
+        }
+
+        @Override
+        public void onLoadFinished(Loader&lt;Account&gt; loader, Account data) {
+            // binds the model to the view and lets the view displays the model in its own way.
+            mView.setModel(data);
+        }
+
+        @Override
+        public void onLoaderReset(Loader&lt;Account&gt; loader) {
+
+        }
+    }
+
+    public static class AccountLoader extends AsyncTaskLoader&lt;Account&gt; {
+
+        public AccountLoader(Context context) {
+            super(context);
+        }
+
+        @Override
+        public Account loadInBackground() {
+            // here loads account from data source.
+        }
+    }
+}</code></pre>
+                        <p>Below is an implementation of the AccountView. We use onModelSet(Account) to bind account information on the view.</p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.widget.CheckBox;
+import android.widget.EditText;
+
+import com.robo.mvp.AbstractFragment;
+import com.robo.mvp.BindTo;
+
+@BindTo(AccountPresenter.class)
+public class AccountFragment extends AbstractFragment&lt;Account&gt; implements AccountView {
+
+    private EditText edtFullName;
+    private CheckBox chkGenre;
+    private EditText edtAddress;
+
+    @Override
+    protected void onModelSet(Account account) {
+        edtFullName.setText(account.getFullName());
+        chkGenre.setChecked(account.getGenre());
+        edtAddress.setText(account.getAddress());
+    }
+}</code></pre>
+                        <blockquote>Robo MVP also plays very well with Google Data Binding library. If you are using the library, you can place Google Binding statements within the method onModelSet above. We will supplement detailed example of using the library in Supervising Controller later.</blockquote>                        
+                    </div>
+                </div>
+                <!-- Table of contents -->
+                <div class="col hide-on-small-only m3 l2">
+                    <div class="toc-wrapper">
+                        <div style="height: 1px;">
+                            <ul class="table-of-contents">
+                                <li><a href="#overview">Overview</a></li>
+                                <li><a href="#passive-view">Passive View</a></li>
+                                <li><a href="#supervising-controller">Supervising Controller</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>    <footer class="page-footer">
+        <div class="footer-copyright">
+            <div class="container">
+                © 2016 Robo Creative. All rights reserved.
+            </div>
+        </div>
+    </footer>
+    <!--  Scripts-->
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/jquery.timeago.min.js"></script>
+    <script src="js/materialize.js"></script>
+    <script src="js/init.js"></script>
+</body>
+</html>                

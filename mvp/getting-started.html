@@ -1,0 +1,245 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="description" content="Quickly get started with Robo MVP.">
+    <title>Getting Started - Robo MVP</title>
+    <!-- Favicons-->
+    <link rel="apple-touch-icon-precomposed" href="images/favicon/apple-touch-icon-152x152.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="images/favicon/mstile-144x144.png">
+    <link rel="icon" href="images/favicon/favicon-32x32.png" sizes="32x32">
+    <!--  Android 5 Chrome Color-->
+    <meta name="theme-color" content="#4CAF50">
+    <!-- CSS-->
+    <link href="css/androidstudio.css" rel="stylesheet">
+    <link href="css/site.css" type="text/css" rel="stylesheet" media="screen,projection">
+    <link href="http://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css">
+    <script src="js/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <div class="container"><a href="#" data-activates="nav-mobile" class="button-collapse top-nav"><i class="mdi-navigation-menu"></i></a></div>
+        <ul id="nav-mobile" class="side-nav fixed">
+            <li class="logo">
+                <a id="logo-container" href="index.html" class="brand-logo">
+                    <object id="front-page-logo" type="image/png" data="images/robo-mvp-logo-small.png" />Logo</object>
+                </a>
+            </li>
+
+            <li class="bold active"><a href="getting-started.html" class="waves-effect waves-teal">Getting Started</a></li>
+            <li class="bold"><a href="dependency-injection.html" class="waves-effect waves-teal">Dependency Injection</a></li>
+            <li class="bold"><a href="annotation-processor.html" class="waves-effect waves-teal">Annotation Processor</a></li>
+            <li class="bold"><a href="view-features.html" class="waves-effect waves-teal">View Features</a></li>
+            <li class="bold"><a href="view-types.html" class="waves-effect waves-teal">View Types</a></li>
+            <li class="bold"><a href="presenter-features.html" class="waves-effect waves-teal">Presenter Features</a></li>
+            <li class="bold"><a href="variants.html" class="waves-effect waves-teal">Variants</a></li>
+            <li class="bold"><a href="#" class="waves-effect waves-teal">Demo Center (Coming Soon)</a></li>
+            <li class="bold"><a href="javadocs/index.html" class="waves-effect waves-teal">Java Documentation</a></li>
+
+        </ul>
+    </header>
+    <main>
+        <div class="section" id="index-banner">
+            <div class="container">
+                <div class="row">
+                    <div class="col s12 m9">
+                        <h2 class="header center-on-small-only">Getting Started</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <!--  Outer row  -->
+            <div class="row">
+                <div class="section col s12 m9 l10">
+                    <div id="installation" class="row scrollspy">
+                        <div class="col s12">
+                            <h4 class="header">Installation</h4>
+                            <p>Add dependencies to your build.gradle:</p>
+<pre><code class="gradle">dependencies {
+    compile 'com.robocreative.android:robo-common:1.0'
+    compile 'com.robocreative.android:robo-messaging:1.0'
+    compile 'com.robocreative.android:robo-mvp:1.0'
+}</code></pre>
+                            <p>If you want to use stuffs in support v4 library, add following dependency:</p>
+<pre><code class="gradle">dependencies {
+    compile 'com.robocreative.android:robo-mvp-support-v4:1.0'
+}</code></pre>
+                            <p>If you want to use stuffs in appcompat v7 library, add following dependency:</p>
+<pre><code class="gradle">dependencies {
+    compile 'com.robocreative.android:robo-mvp-support-v7:1.0'
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="declaring-view" class="row scrollspy">
+                        <div class="col s12">
+                            <h4 class="header">Declaring View</h4>
+                            <p>Let's create a screen that warmly prints a welcome message. Define a view interface as following:</p>
+<pre><code class="java">package com.example.robomvp;
+
+import com.robo.mvp.View;
+
+public interface WelcomeView extends View {
+    /**
+     * Shows a message. The message content is decided by Presenter.
+     */
+    void showMessage(String message);
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="creating-presenter" class="row scrollspy">
+                        <div class="col s12">
+                            <h4 class="header">Creating Presenter</h4>
+                            <p>Create a presenter that inherits AbstractPresenter and accepts WelcomeView as generic parameter:</p>
+<pre><code class="java">package com.example.robomvp;
+
+import com.robo.mvp.AbstractPresenter;
+import com.robo.mvp.View;
+
+public class WelcomePresenter extends AbstractPresenter&lt;WelcomeView&gt; {
+
+    @Override
+    protected void onViewSet(WelcomeView view) {
+        view.getListeners().set(View.OnReadyListener.class, new View.OnReadyListener() {
+            @Override
+            public void onReady() {
+                view.showMessage("Welcome to Robo MVP's world!");
+            }
+        });
+    }
+}</code></pre>
+                            <p>By default, your presenter must implement a method named onViewSet. It's called when your view has been bound to your presenter at runtime. That moment you can register view's event listeners.</p>
+                            <p>The OnReadyListener is default event listener of every view. The method onReady is called when a view signals itself being ready to use (See View's Life cycle). When the view ready, you can ask it to print your message.</p>
+                            <blockquote>View events are briefly described in the section <a href="view-features.html">View Features</a>.</blockquote>
+                        </div>
+                    </div>
+
+                    <div id="implementing-view" class="row scrollspy">
+                        <div class="col s12">
+                            <h4 class="header">Implementing View</h4>
+                            <p>Create a concrete view as an implementation of MyView. In this sample we will use an activity. Layout looks like:</p>
+<pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:orientation=&quot;vertical&quot; android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;TextView
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:id=&quot;@+id/txt_message&quot; /&gt;
+&lt;/LinearLayout&gt;</code></pre>
+                            <p>Java code for the activity:</p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.os.Bundle;
+import android.widget.TextView;
+
+import com.robo.mvp.AbstractActivity;
+
+public class WelcomeActivity extends AbstractActivity implements WelcomeView {
+
+    private TextView txtMessage;
+
+    @Override
+    protected void onInitLayout(Bundle savedInstanceState) {
+        setContentView(R.layout.activity_welcome);
+        txtMessage = (TextView)findViewById(R.id.txt_message);
+    }
+
+    @Override
+    public void showMessage(String message) {
+        txtMessage.setText(message);
+    }
+}</code></pre>
+                            <blockquote>You may noticed that the activity overrides a method onInitLayout(Bundle). This method is used as an alternative for onCreate(Bundle). For activities, please use onInitLayout(Bundle) to initialize layout instead of onCreate(Bundle) as Robo MVP performs presenter binding upon onCreate(Bundle). For fragments, you can use onCreateView(Bundle) as usual.</blockquote>
+                            <p>Use annotation @BindTo on top of this activity to specify its target presenter. This view will be automatically bound to the specified presenter at runtime.</p>
+<pre><code class="java">@BindTo(WelcomePresenter.class)
+public class WelcomeActivity extends AbstractActivity implements WelcomeView {
+    // class body...
+}</code></pre>
+                            <blockquote>Theoretically, you can use @BindTo on top of your view interface, not concrete view (the activity in this case). Robo MVP can still resolve presenter for your view without any problem. Nevertheless, this is not a good practice as it limits reusability of your view, i.e two concrete views having same interface cannot be bound to two different presenters. So, we recommend to always place @BindTo on top of your concrete view, not the view interface.</blockquote>
+                        </div>
+                    </div>
+
+                    <div id="starting-bootstrapper" class="row scrollspy">
+                        <div class="col s12">
+                            <h4 class="header">Starting Bootstrapper</h4>
+                            <p>Robo MVP needs to be started at application starts up. Create an application class and place following statements to start Robo MVP:</p>
+<pre><code class="java">package com.example.myapplication;
+
+import android.app.Application;
+
+import com.robo.mvp.Bootstrapper;
+
+public class MyApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        new Bootstrapper().start();
+    }
+}</code></pre>
+                            <blockquote>Remember to assign your application name in AndroidManifest.xml also.</blockquote>
+                        </div>
+                    </div>
+
+                    <div id="launching-app" class="row scrollspy">
+                        <div class="col s12">
+                            <h4 class="header">Launching Your Application</h4>
+                            <p>Run your first application. In a few moments, the screen should open with the welcome message. Great job!</p>
+                        </div>
+                    </div>
+
+                    <div id="further-reading" class="row scrollspy">
+                        <div class="col s12">
+                            <h4 class="header">Further Reading</h4>
+                            <p>
+                                <div class="collection">
+                                    <a class="collection-item" href="dependency-injection.html">Dependency Injection</a>
+                                    <a class="collection-item" href="view-features.html">View Features</a>
+                                    <a class="collection-item" href="view-types.html">View Types</a>
+                                    <a class="collection-item" href="presenter-features.html">Presenter Features</a>
+                                </div>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table of contents -->
+                <div class="col hide-on-small-only m3 l2">
+                    <div class="toc-wrapper">
+                        <div style="height: 1px;">
+                            <ul class="table-of-contents">
+                                <li><a href="#installation">Installation</a></li>
+                                <li><a href="#declaring-view">Declaring View</a></li>
+                                <li><a href="#creating-presenter">Creating Presenter</a></li>
+                                <li><a href="#implementing-view">Implementing View</a></li>
+                                <li><a href="#starting-bootstrapper">Starting Bootstrapper</a></li>
+                                <li><a href="#launching-app">Launching Your App</a></li>
+                                <li><a href="#further-reading">Further Reading</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>    <footer class="page-footer">
+        <div class="footer-copyright">
+            <div class="container">
+                © 2016 Robo Creative. All rights reserved.
+            </div>
+        </div>
+    </footer>
+    <!--  Scripts-->
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="js/jquery.timeago.min.js"></script>
+    <script src="js/materialize.js"></script>
+    <script src="js/init.js"></script>
+</body>
+</html>
