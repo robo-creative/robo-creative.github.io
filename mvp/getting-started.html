@@ -158,7 +158,7 @@ public class WelcomeActivity extends AbstractActivity implements WelcomeView {
         txtMessage.setText(message);
     }
 }</code></pre>
-                            <blockquote>You may noticed that the activity overrides a method onInitLayout(Bundle). This method is used as an alternative for onCreate(Bundle). For activities, please use onInitLayout(Bundle) to initialize layout instead of onCreate(Bundle) as Robo MVP performs presenter binding upon onCreate(Bundle). For fragments, you can use onCreateView(Bundle) as usual.</blockquote>
+                            <blockquote>You may noticed that the activity overrides a method onInitLayout(Bundle). This method is used to initialize layout for activity as an alternative to onCreate(Bundle). It is actually called inside onCreate(Bundle). As a special design of Robo MVP, please use onInitLayout(Bundle) to set layout to activity instead of onCreate(Bundle).</blockquote>
                             <p>Use annotation @BindTo on top of this activity to specify its target presenter. This view will be automatically bound to the specified presenter at runtime.</p>
 <pre><code class="java">@BindTo(WelcomePresenter.class)
 public class WelcomeActivity extends AbstractActivity implements WelcomeView {
