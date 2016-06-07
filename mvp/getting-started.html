@@ -121,6 +121,23 @@ public class WelcomePresenter extends AbstractPresenter&lt;WelcomeView&gt; {
                         </div>
                     </div>
 
+                    <div id="presenter-life-cycle" class="row scrollspy">
+                        <div class="col s12">
+                            <h4 class="header">Presenter Life Cycle</h4>
+                            <p class="caption">Before implementing View, please take a short break and read this section to be explained life cycle of Presenter.</p>
+                            <p>In Robo MVP, Presenter is automatically resolved when View is created at runtime. Thus you don't need to call Presenter's constructor on your own. Presenter is automatically destroyed when the View is about to be destroyed also.</p>
+                            <p>The diagram below shows the moments Presenter is populated and destroyed, corresponding to life cycle of Activity and Fragment and explains the flow inside Presenter Binding/Removal in details:</p>
+                            <img id="responsive-img" src="images/presenter-life-cycle.png">
+                            <p>As in the diagram:</p>
+                            <ul class="collection">
+                                <li class="collection-item">Presenter collaborators including Application Controller, Message Bus and View are automatically set upon Presenter initialization, and</li>
+                                <li class="collection-item">These Presenter collaborators are automatically unset upon Presenter removal.</li>
+                            </ul>
+                            <p>Besides, Presenter interface also declares a method named destroy(). This method is called at the very last step in Presenter removal flow, allows you to release other resources allocated for Presenter.</p>
+                            <blockquote>If you allocated some resources as part of your Presenter, e.g IO Stream, remember to free all of them either by overriding method destroy() from AbstractPresenter, or before the moment this function is called.</blockquote>
+                        </div>
+                    </div>
+
                     <div id="implementing-view" class="row scrollspy">
                         <div class="col s12">
                             <h4 class="header">Implementing View</h4>
@@ -219,6 +236,7 @@ public class MyApplication extends Application {
                                 <li><a href="#installation">Installation</a></li>
                                 <li><a href="#declaring-view">Declaring View</a></li>
                                 <li><a href="#creating-presenter">Creating Presenter</a></li>
+                                <li><a href="#presenter-life-cycle">Presenter Life Cycle</a></li>
                                 <li><a href="#implementing-view">Implementing View</a></li>
                                 <li><a href="#starting-bootstrapper">Starting Bootstrapper</a></li>
                                 <li><a href="#launching-app">Launching Your App</a></li>
