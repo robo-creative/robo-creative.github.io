@@ -114,7 +114,7 @@ public class MyPublisher {
                     <div id="callback" class="row scrollspy">
                         <h4 class="col s12 header">Publishing with Callback</h4>
                         <div class="col s12">
-                            <p>Use this option to enable callback to the publisher. The interface com.robo.messaging.PublishingCallback has two following methods:</p>
+                            <p>Use this option to enable callback to the publisher. The interface com.robo.messaging.PublisherCallback has two following methods:</p>
                             <ul class="collection">
                                 <li class="collection-item"><b>noSubsriber()</b> will be called when there is no subscriber for the message at the moment.</li>
                                 <li class="collection-item"><b>messageEnqueued()</b> will be called when there is at least one subscriber for the message and the message is being delivered to the subscribers.</li>
@@ -125,7 +125,7 @@ public class MyPublisher {
 import android.util.Log;
 
 import com.robo.messaging.MessageBus;
-import com.robo.messaging.PublishingCallback;
+import com.robo.messaging.PublisherCallback;
 
 public class MyPublisher {
 
@@ -136,7 +136,7 @@ public class MyPublisher {
     }
 
     public void doPublishWithCallback() {
-        mMessageBus.publish(new MyMessage("Published with callback"), false, new PublishingCallback() {
+        mMessageBus.publish(new MyMessage("Published with callback"), false, new PublisherCallback() {
             @Override
             public void noSubscriber() {
                 Log.d("MessageBus", "There was no subscriber at the time of publication");
