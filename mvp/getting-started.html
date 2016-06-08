@@ -81,7 +81,7 @@
                         <div class="col s12">
                             <h4 class="header">Declaring View</h4>
                             <p>Let's create a screen that warmly prints a welcome message. Define a view interface as following:</p>
-<pre><code class="java">package com.example.robomvp;
+<pre><code class="java">package com.example.myapplication;
 
 import com.robo.mvp.View;
 
@@ -98,7 +98,7 @@ public interface WelcomeView extends View {
                         <div class="col s12">
                             <h4 class="header">Creating Presenter</h4>
                             <p>Create a presenter that inherits AbstractPresenter and accepts WelcomeView as generic parameter:</p>
-<pre><code class="java">package com.example.robomvp;
+<pre><code class="java">package com.example.myapplication;
 
 import com.robo.mvp.AbstractPresenter;
 import com.robo.mvp.View;
@@ -106,7 +106,7 @@ import com.robo.mvp.View;
 public class WelcomePresenter extends AbstractPresenter&lt;WelcomeView&gt; {
 
     @Override
-    protected void onViewSet(WelcomeView view) {
+    protected void onViewSet(final WelcomeView view) {
         view.getListeners().set(View.OnReadyListener.class, new View.OnReadyListener() {
             @Override
             public void onReady() {
