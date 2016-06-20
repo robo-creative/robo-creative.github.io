@@ -423,6 +423,7 @@ import android.util.Log;
 import com.robo.messaging.MessageBus;
 import com.robo.messaging.Subscriber;
 import com.robo.messaging.ThreadOption;
+import com.robo.messaging.SubscriptionToken;
 
 public class MySubscriber {
 
@@ -443,7 +444,7 @@ public class MySubscriber {
         };
 
         // maintains a strong reference to subscriber. The last parameter is the thing.
-        mMessageBus.subscribe(mSubscriber, 0, false, true, ThreadOption.PUBLISHER, true);
+        mSubscriptionToken = mMessageBus.subscribe(mSubscriber, 0, false, true, ThreadOption.PUBLISHER, true);
     }
 
     public void unsubscribe() {
@@ -452,13 +453,51 @@ public class MySubscriber {
         // weak-referenced subscribers, as we don't know exactly when the GC actually collects the
         // weak-referenced subscribers. Keeping subscription for a destroyed subscriber might lead
         // to weird application behaviors.
-        mMessageBus.unsubscribe(mSubscriber);
+        mMessageBus.unsubscribe(mSubscriptionToken);
     }
 }</code></pre>
                     </div>
                 </div>
 
+                <div id="cancelling-subscription" class="row scrollspy">
+                    <h4 class="col s12 header">Cancelling a Subscription</h4>
+                    <div class="col s12">
+                        <p>To cancel a subscription of a subscriber, use method unsubscribe() with the SubscriptionToken retrieved from subscribing the subscriber before.</p>
+                        <h5>Sample</h5>
+<pre><code class="java">package com.example.myapplication;
 
+import android.util.Log;
+
+import com.robo.messaging.MessageBus;
+import com.robo.messaging.Subscriber;
+import com.robo.messaging.SubscriptionToken;
+
+public class MySubscriber {
+
+    private MessageBus mMessageBus;
+    private SubscriptionToken mSubscriptionToken;
+
+    public MySubscriber(MessageBus messageBus) {
+        mMessageBus = messageBus;
+    }
+
+    public void doSubscribe() {
+        // keeps the subscription token for cancellation later on.
+        mSubscriptionToken = mMessageBus.subscribe(new Subscriber&lt;MyMessage&gt;() {
+            @Override
+            public void receive(MyMessage message) {
+                Log.d("MessageBus", "Received message: " + message.getContent());
+            }
+        });
+    }
+
+    public void doUnsubscribe() {
+        // uses the token to cancel subscription.
+        mMessageBus.unsubscribe(mSubscriptionToken);
+    }
+}</code></pre>
+                    </div>
+                </div>
 
             </div>
             <!-- Table of contents -->
@@ -473,6 +512,7 @@ public class MySubscriber {
                             <li><a href="#delivery-thread">Delivery Thread</a></li>
                             <li><a href="#custom-strategy">Custom Delivery Strategy</a></li>
                             <li><a href="#keeping-subscriber-alive">Keeping Subscriber Alive</a></li>
+                            <li><a href="#cancelling-subscription">Cancelling a Subscription</a></li>
                         </ul>
                     </div>
                 </div>
